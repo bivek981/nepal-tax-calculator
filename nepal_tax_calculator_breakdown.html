@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nepal Tax Calculator</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f5f5f5;padding:15px}
+.card{max-width:600px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+input,button{width:100%;padding:12px;margin-top:10px;font-size:16px;box-sizing:border-box}
+button{background:#2563eb;color:#fff;border:none;border-radius:8px}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{border:1px solid #ddd;padding:8px;text-align:left}
+th{background:#2563eb;color:white}
+.result{margin-top:15px;font-weight:bold;font-size:18px}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>Nepal Tax Calculator</h2>
+<input type="number" id="income" placeholder="Enter yearly income (NPR)">
+<button onclick="calculateTax()">Calculate</button>
+
+<div id="breakdown"></div>
+<div class="result" id="total"></div>
+</div>
+
+<script>
+function calculateTax(){
+ let income=parseFloat(document.getElementById('income').value)||0;
+ let original=income;
+ let tax=0;
+ let rows='';
+
+ const slabs=[
+   {limit:1000000, rate:0.01, label:'First 10,00,000'},
+   {limit:500000, rate:0.10, label:'Next 5,00,000'},
+   {limit:1000000, rate:0.20, label:'Next 10,00,000'},
+   {limit:1500000, rate:0.27, label:'Next 15,00,000'}
+ ];
+
+ for(let s of slabs){
+   let taxable=Math.min(income,s.limit);
+   if(taxable>0){
+      let slabTax=taxable*s.rate;
+      tax+=slabTax;
+      rows+=`<tr><td>${s.label}</td><td>${taxable.toLocaleString()}</td><td>${(s.rate*100)}%</td><td>${slabTax.toLocaleString()}</td></tr>`;
+      income-=taxable;
+   }
+ }
+
+ if(income>0){
+    let slabTax=income*0.31;
+    tax+=slabTax;
+    rows+=`<tr><td>Above 40,00,000</td><td>${income.toLocaleString()}</td><td>31%</td><td>${slabTax.toLocaleString()}</td></tr>`;
+ }
+
+ document.getElementById('breakdown').innerHTML=`
+ <table>
+ <tr><th>Slab</th><th>Taxable Amount</th><th>Rate</th><th>Tax</th></tr>
+ ${rows}
+ </table>`;
+
+ document.getElementById('total').innerHTML=
+ `Total Income: NPR ${original.toLocaleString()}<br>
+ Total Tax: NPR ${tax.toLocaleString()}<br>
+ Net Income After Tax: NPR ${(original-tax).toLocaleString()}`;
+}
+</script>
+</body>
+</html>
